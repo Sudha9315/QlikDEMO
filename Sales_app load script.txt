@@ -122,3 +122,5 @@ Resident TempCalendar
 Order By TempDate ASC;
 
 Drop Table TempCalendar;
+///$tab Exit script
+Exit script;
