@@ -122,7 +122,5 @@ Resident TempCalendar
 Order By TempDate ASC;
 
 Drop Table TempCalendar;
-///$tab Testing
-//This section is added for testing purpose.
 ///$tab Exit script
 Exit script;
