@@ -19,8 +19,6 @@ SET DayNames='Mon;Tue;Wed;Thu;Fri;Sat;Sun';
 SET LongDayNames='Monday;Tuesday;Wednesday;Thursday;Friday;Saturday;Sunday';
 SET NumericalAbbreviation='3:k;6:M;9:G;12:T;15:P;18:E;21:Z;24:Y;-3:m;-6:μ;-9:n;-12:p;-15:f;-18:a;-21:z;-24:y';
 
-///$tab Env section
-// This is for the environment variable 
 ///$tab Order
 Order:
 LOAD
@@ -52,75 +50,5 @@ FROM [lib://Cognida_Dev:DataFiles/Product.xls]
 (biff, embedded labels, table is Sheet1$);
 
 
-///$tab Master calendar
-QuartersMap:
-
-MAPPING LOAD 
-
-rowno() as Month,
-
-'Q' & Ceil (rowno()/3) as Quarter
-
-AUTOGENERATE (12);
-
-Temp:
-
-Load
-
-               min(transaction_date) as minDate,
-
-               max(transaction_date) as maxDate
-
-Resident Order;
-
-Let varMinDate = Num(Peek('minDate', 0, 'Temp'));
-
-Let varMaxDate = Num(Peek('maxDate', 0, 'Temp'));
-
-DROP Table Temp;
-
-TempCalendar:
-
-LOAD
-
-               $(varMinDate) + Iterno()-1 As Num,
-
-               Date($(varMinDate) + IterNo() - 1) as TempDate
-
-               AutoGenerate 1 While $(varMinDate) + IterNo() -1 <= $(varMaxDate);
-
-MasterCalendar:
-
-Load
-
-               TempDate AS DATE_KEY,
-
-               week(TempDate) As Week,
-
-               Year(TempDate) As Year,
-
-               Month(TempDate) As Month,
-
-               Day(TempDate) As Day,
-
-               YeartoDate(TempDate)*-1 as CurYTDFlag,
-
-               YeartoDate(TempDate,-1)*-1 as LastYTDFlag,
-
-               inyear(TempDate, Monthstart($(varMaxDate)),-1) as RC12,
-
-               date(monthstart(TempDate), 'MMM-YYYY') as MonthYear,
-
-               ApplyMap('QuartersMap', month(TempDate), Null()) as Quarter,
-
-               Week(weekstart(TempDate)) & '-' & WeekYear(TempDate) as WeekYear,
-
-               WeekDay(TempDate) as WeekDay
-
-Resident TempCalendar
-
-Order By TempDate ASC;
-
-Drop Table TempCalendar;
 ///$tab Exit script
 Exit script;
