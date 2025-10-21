@@ -19,8 +19,6 @@ SET DayNames='Mon;Tue;Wed;Thu;Fri;Sat;Sun';
 SET LongDayNames='Monday;Tuesday;Wednesday;Thursday;Friday;Saturday;Sunday';
 SET NumericalAbbreviation='3:k;6:M;9:G;12:T;15:P;18:E;21:Z;24:Y;-3:m;-6:μ;-9:n;-12:p;-15:f;-18:a;-21:z;-24:y';
 
-///$tab Test
-
 ///$tab Order
 Order:
 LOAD
@@ -30,7 +28,7 @@ LOAD
     Date(Date#(transaction_date,'DD-MM-YYYY')) AS transaction_date,
     Date(Date#(transaction_date,'DD-MM-YYYY')) AS DATE_KEY
     
-FROM [lib://Cognida_Dev:DataFiles/Sampletransaction data.csv]
+FROM [lib://Cognida_DEV_QVD:DataFiles/Sampletransaction data.csv]
 (txt, codepage is 28591, embedded labels, delimiter is ',', msq);
 
 Store Order into [lib://Cognida_DEV_QVD:DataFiles/Order.qvd](qvd);
@@ -42,7 +40,7 @@ Customer:
 LOAD
     Cid,
     customer_name
-FROM [lib://Cognida_Dev:DataFiles/Customer detail.xls]
+FROM [lib://Cognida_DEV_QVD:DataFiles/Customer detail.xls]
 (biff, embedded labels, table is Sheet1$);
 
 Store Customer into [lib://Cognida_DEV_QVD:DataFiles/Customer.qvd](qvd);
@@ -51,7 +49,7 @@ Product:
 LOAD
     Pid,
     "Product Name"
-FROM [lib://Cognida_Dev:DataFiles/Product.xls]
+FROM [lib://Cognida_DEV_QVD:DataFiles/Product.xls]
 (biff, embedded labels, table is Sheet1$);
 
 Store Product into [lib://Cognida_DEV_QVD:DataFiles/Product.qvd](qvd);
