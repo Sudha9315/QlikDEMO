@@ -55,5 +55,3 @@ FROM [lib://Cognida_DEV_QVD:DataFiles/Product.xls]
 Store Product into [lib://Cognida_DEV_QVD:DataFiles/Product.qvd](qvd);
 ///$tab Exit script
 Exit script;
-///$tab Test script
-//This is a test section for the 
