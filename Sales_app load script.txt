@@ -22,23 +22,13 @@ SET NumericalAbbreviation='3:k;6:M;9:G;12:T;15:P;18:E;21:Z;24:Y;-3:m;-6:μ;-9:n;
 ///$tab Order
 Order:
 LOAD
-    transaction_id as Pid,
+    Pid,
     Cid,
     amount,
-    Date(Date#(transaction_date,'DD-MM-YYYY')) AS transaction_date,
-    Date(Date#(transaction_date,'DD-MM-YYYY')) AS DATE_KEY
-    
-FROM [lib://Cognida_Dev:DataFiles/Sampletransaction data.csv]
-(txt, codepage is 28591, embedded labels, delimiter is ',', msq);
-
-
-///$tab Customer
-Customer:
-LOAD
-    Cid,
-    customer_name
-FROM [lib://Cognida_Dev:DataFiles/Customer detail.xls]
-(biff, embedded labels, table is Sheet1$);
+    transaction_date,
+    DATE_KEY
+FROM [lib://Cognida_DEV_QVD:DataFiles/Order.qvd]
+(qvd);
 
 
 ///$tab Product
@@ -46,9 +36,90 @@ Product:
 LOAD
     Pid,
     "Product Name"
-FROM [lib://Cognida_Dev:DataFiles/Product.xls]
-(biff, embedded labels, table is Sheet1$);
+FROM [lib://Cognida_DEV_QVD:DataFiles/Product.qvd]
+(qvd);
 
 
-///$tab Exit script
-Exit script;
+///$tab Customer
+Customer:
+LOAD
+    Cid,
+    customer_name
+FROM [lib://Cognida_DEV_QVD:DataFiles/Customer.qvd]
+(qvd);
+
+
+///$tab Master calendar
+QuartersMap:
+
+MAPPING LOAD 
+
+rowno() as Month,
+
+'Q' & Ceil (rowno()/3) as Quarter
+
+AUTOGENERATE (12);
+
+Temp:
+
+Load
+
+               min(DATE_KEY) as minDate,
+
+               max(DATE_KEY) as maxDate
+
+Resident Order;
+
+Let varMinDate = Num(Peek('minDate', 0, 'Temp'));
+
+Let varMaxDate = Num(Peek('maxDate', 0, 'Temp'));
+
+DROP Table Temp;
+
+TempCalendar:
+
+LOAD
+
+               $(varMinDate) + Iterno()-1 As Num,
+
+               Date($(varMinDate) + IterNo() - 1) as TempDate
+
+               AutoGenerate 1 While $(varMinDate) + IterNo() -1 <= $(varMaxDate);
+
+MasterCalendar:
+
+Load
+
+               TempDate AS OrderDate,
+
+               week(TempDate) As Week,
+
+               Year(TempDate) As Year,
+
+               Month(TempDate) As Month,
+
+               Day(TempDate) As Day,
+
+               YeartoDate(TempDate)*-1 as CurYTDFlag,
+
+               YeartoDate(TempDate,-1)*-1 as LastYTDFlag,
+
+               inyear(TempDate, Monthstart($(varMaxDate)),-1) as RC12,
+
+               date(monthstart(TempDate), 'MMM-YYYY') as MonthYear,
+
+               ApplyMap('QuartersMap', month(TempDate), Null()) as Quarter,
+
+               Week(weekstart(TempDate)) & '-' & WeekYear(TempDate) as WeekYear,
+
+               WeekDay(TempDate) as WeekDay
+
+Resident TempCalendar
+
+Order By TempDate ASC;
+
+Drop Table TempCalendar;
+///$tab EXIT SCRIPT
+EXIT SCRIPT;
+///$tab Test
+//This is a test section
